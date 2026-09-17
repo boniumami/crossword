@@ -7,7 +7,7 @@
     "dev": "vite --host 0.0.0.0 --port 5173",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0 --port 5173",
-    "test": "node --test src/tokenizer.test.js src/grade.test.js"
+    "test": "node --test src/tokenizer.test.js src/grade.test.js src/roundSize.test.js"
   },
   "devDependencies": {
     "vite": "^6.2.0"

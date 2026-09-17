@@ -4,6 +4,7 @@ const path = require("node:path");
 const express = require("express");
 const multer = require("multer");
 const { initDb, getDb, UPLOAD_IMAGES, UPLOAD_MUSIC } = require("./db");
+const { parseRoundSize } = require("./round");
 
 const PORT = Number(process.env.PORT || 3001);
 const IMAGE_MIMES = new Set(["image/png", "image/jpeg", "image/gif", "image/webp", "image/apng"]);
@@ -140,13 +141,18 @@ app.get("/api/poems", (_req, res) => {
   res.json(rows.map(poemPublic));
 });
 
-app.get("/api/round", (_req, res) => {
-  const rows = getDb().prepare(POEM_SELECT).all();
-  if (rows.length < 5) {
-    res.status(400).json({ error: "题库至少需要 5 首诗词才能开始一轮" });
+app.get("/api/round", (req, res) => {
+  const count = parseRoundSize(req.query.count);
+  if (count === null) {
+    res.status(400).json({ error: "每组出题数需为 1 到 50 的整数" });
     return;
   }
-  res.json(shuffle(rows).slice(0, 5).map(poemPublic));
+  const rows = getDb().prepare(POEM_SELECT).all();
+  if (rows.length < count) {
+    res.status(400).json({ error: `题库至少需要 ${count} 首诗词才能开始一轮` });
+    return;
+  }
+  res.json(shuffle(rows).slice(0, count).map(poemPublic));
 });
 
 function parseOptionalId(value) {

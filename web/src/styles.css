@@ -163,6 +163,25 @@ button {
   font-size: var(--ui-meta);
 }
 
+.round-size {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 8px 0 20px;
+  font-size: var(--ui-meta);
+}
+
+.round-size input {
+  width: 88px;
+  min-height: 40px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid #d9c39a;
+  background: #fffaf0;
+  text-align: center;
+}
+
 .play {
   position: relative;
   overflow: hidden;

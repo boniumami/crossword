@@ -1,4 +1,5 @@
 import { isComplete, isCorrect, placeNext, removeSlot, replaceSlot } from "./grade.js";
+import { DEFAULT_ROUND_SIZE, clampRoundSize, parseRoundSize } from "./roundSize.js";
 import { createBoard, tokenizePoem } from "./tokenizer.js";
 
 const app = document.getElementById("app");
@@ -8,6 +9,7 @@ audio.volume = 0.35;
 
 const state = {
   view: "home",
+  roundSize: DEFAULT_ROUND_SIZE,
   poemCount: 0,
   imageCount: 0,
   musicCount: 0,
@@ -81,10 +83,16 @@ function loadPoem(poem) {
   state.modal = null;
 }
 
+function currentRoundSize() {
+  return clampRoundSize(state.roundSize, state.poemCount);
+}
+
 async function startRound() {
   try {
     state.homeError = "";
-    const round = await api("/api/round");
+    const count = currentRoundSize();
+    state.roundSize = count;
+    const round = await api(`/api/round?count=${encodeURIComponent(count)}`);
     state.round = round;
     state.index = 0;
     state.view = "play";
@@ -118,7 +126,7 @@ function dismissModal() {
       applyMedia(currentPoem());
       return;
     }
-    state.modal = { kind: "done", text: "本轮 5 首全部完成！" };
+    state.modal = { kind: "done", text: `本轮 ${state.round.length} 首全部完成！` };
   }
   render();
 }
@@ -146,6 +154,20 @@ function renderHome() {
     ]),
     el("div", { class: "panel" }, [
       el("p", { class: "hint", text: `题库 ${state.poemCount} 首 · 图片 ${state.imageCount} 张 · 音乐 ${state.musicCount} 首` }),
+      el("label", { class: "round-size" }, [
+        el("span", { text: "每组出题数" }),
+        el("input", {
+          type: "number",
+          min: "1",
+          max: String(Math.max(1, state.poemCount || 50)),
+          value: String(currentRoundSize()),
+          onChange: (ev) => {
+            const parsed = parseRoundSize(ev.target.value);
+            state.roundSize = clampRoundSize(parsed ?? DEFAULT_ROUND_SIZE, state.poemCount);
+            ev.target.value = String(state.roundSize);
+          },
+        }),
+      ]),
       el("div", { class: "actions" }, [
         el("button", { class: "btn", text: "开始一轮", onClick: startRound }),
         el("button", { class: "btn secondary", text: "题库管理", onClick: () => openLibrary() }),
@@ -245,7 +267,7 @@ function renderPlay() {
     el("div", { class: "play-top" }, [
       el("div", {}, [
         el("h2", { text: poem.title }),
-        el("div", { class: "meta", text: `${poem.author} · 第 ${state.index + 1} / 5 题` }),
+        el("div", { class: "meta", text: `${poem.author} · 第 ${state.index + 1} / ${state.round.length} 题` }),
       ]),
       el("button", {
         class: "btn ghost",

@@ -10,7 +10,7 @@
     "dev": "concurrently -k \"npm run server\" \"npm run web\"",
     "build": "npm run build --prefix web",
     "start": "node server/index.js",
-    "test": "npm test --prefix web"
+    "test": "npm test --prefix web && node --test server/round.test.js"
   },
   "dependencies": {
     "express": "^4.21.2",
