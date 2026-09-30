@@ -9,6 +9,22 @@ const UPLOAD_IMAGES = path.join(ROOT, "uploads", "images");
 const UPLOAD_MUSIC = path.join(ROOT, "uploads", "music");
 const SEED_IMAGES = path.join(ROOT, "seed-assets", "images");
 const SEED_MUSIC = path.join(ROOT, "seed-assets", "music");
+const SEED_IMAGE_FILES = [
+  "default.gif",
+  "jingyesi.gif",
+  "chunxiao.gif",
+  "yonge.gif",
+  "minnong.gif",
+  "dengguanquelou.gif",
+];
+const SEED_MUSIC_FILES = [
+  "default.wav",
+  "jingyesi.wav",
+  "chunxiao.wav",
+  "yonge.wav",
+  "minnong.wav",
+  "dengguanquelou.wav",
+];
 
 /** @type {import("node:sqlite").DatabaseSync | null} */
 let db = null;
@@ -25,8 +41,15 @@ function copySeedFile(srcDir, destDir, filename) {
   if (!fs.existsSync(src)) {
     throw new Error(`缺少种子文件: ${src}`);
   }
-  if (!fs.existsSync(dest)) {
-    fs.copyFileSync(src, dest);
+  fs.copyFileSync(src, dest);
+}
+
+function overwriteSeedAssets() {
+  for (const filename of SEED_IMAGE_FILES) {
+    copySeedFile(SEED_IMAGES, UPLOAD_IMAGES, filename);
+  }
+  for (const filename of SEED_MUSIC_FILES) {
+    copySeedFile(SEED_MUSIC, UPLOAD_MUSIC, filename);
   }
 }
 
@@ -111,6 +134,7 @@ function seedIfEmpty(database) {
 
 function initDb() {
   ensureDirs();
+  overwriteSeedAssets();
   db = new DatabaseSync(DB_PATH);
   db.exec("PRAGMA foreign_keys = ON;");
   db.exec(`
@@ -159,4 +183,8 @@ module.exports = {
   UPLOAD_IMAGES,
   UPLOAD_MUSIC,
   DB_PATH,
+  SEED_IMAGE_FILES,
+  SEED_MUSIC_FILES,
+  copySeedFile,
+  overwriteSeedAssets,
 };

@@ -65,7 +65,8 @@ function applyMedia(poem) {
   const url = poem?.image?.url || "/api/files/images/default.gif";
   if (layer) layer.style.backgroundImage = `url("${url}")`;
   const musicUrl = poem?.music?.url || "/api/files/music/default.wav";
-  if (audio.src !== new URL(musicUrl, window.location.href).href) {
+  const absolute = new URL(musicUrl, window.location.href).href;
+  if (audio.src !== absolute) {
     audio.src = musicUrl;
   }
   if (state.muted) audio.pause();
@@ -208,7 +209,6 @@ function renderPlay() {
             state.selectedIndex = si;
           }
           render();
-          applyMedia(currentPoem());
         },
       });
       line.append(slot);
@@ -231,7 +231,6 @@ function renderPlay() {
           state.bank = next.bank;
           state.selectedIndex = null;
           render();
-          applyMedia(currentPoem());
         },
       })
     );
@@ -277,7 +276,6 @@ function renderPlay() {
           if (state.muted) audio.pause();
           else audio.play().catch(() => {});
           render();
-          applyMedia(currentPoem());
         },
       }),
     ]),
